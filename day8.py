@@ -7,8 +7,10 @@ currentIndex = 0
 accumulator = 0
 notVisited = True
 
-
 while notVisited:
+    if currentIndex >= len(lines):
+        break
+
     if currentIndex in visited:
         notVisited = True
         break
@@ -35,5 +37,8 @@ while notVisited:
             currentIndex += size
         else:
             currentIndex -= size
-        
+
+for key in sorted(visited):
+    print(str(key))
+print("currentIndex is: " + str(currentIndex))     
 print("Accumulator is: " + str(accumulator)) 
