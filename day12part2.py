@@ -13,8 +13,8 @@ class Ship():
         self.x += int(x)
         self.y += int(y)
         self.direction = (self.direction + direction) % 360
-        self.waypointX += int(waypointX) + int(x)
-        self.waypointY += int(waypointY) + int(y)
+        self.waypointX = int(waypointX)
+        self.waypointY = int(waypointY)
     
     def waypointXDistance(self):
         return self.waypointX - self.x
@@ -24,16 +24,17 @@ class Ship():
     
     
 import math
-import numpy as np
 
 def rotate(origin, point, degrees):
 
-        radians = np.deg2rad(degrees)
-        ox, oy = origin
-        px, py = point
+        radians = math.radians(degrees)
 
-        qx = ox + math.cos(radians) * (px - ox) - math.sin(radians) * (py - oy)
-        qy = oy + math.sin(radians) * (px - ox) + math.cos(radians) * (py - oy)
+        x, y = point
+        ox, oy = origin
+
+        qx = ox + math.cos(radians) * (x - ox) + math.sin(radians) * (y - oy)
+        qy = oy + -math.sin(radians) * (x - ox) + math.cos(radians) * (y - oy)
+
         return qx, qy
 
 
@@ -45,42 +46,49 @@ for line in lines:
     instructions = re.split(r'(\d+)',line)
     move = instructions[0]
     distance = int(instructions[1])
-    x = y = direction = waypointX = waypointY = 0
-
+    
     if myShip is None:
         myShip = Ship(90)
+    
+    x = y = direction = degrees = 0
+    waypointX = myShip.waypointX
+    waypointY = myShip.waypointY
 
     if move == "N":
-        waypointY = distance
+        waypointY = myShip.waypointY + distance
     elif move == "S":
-        waypointY -= distance
+        waypointY = myShip.waypointY - distance
     elif move == "E":
-        waypointX = distance
+        waypointX = myShip.waypointX + distance
     elif move == "W":
-        waypointX -= distance
+        waypointX = myShip.waypointX - distance
     elif move == "L":
-        direction -= distance
-        result = rotate((myShip.x, myShip.y), (myShip.x + myShip.waypointX, myShip.y + myShip.waypointY), -direction)
-        waypointX = myShip.waypointX - result[0]
-        waypointY = myShip.waypointY - result[1]
+        degrees -= distance
+        result = rotate((myShip.x, myShip.y), (myShip.waypointX, myShip.waypointY), degrees)
+        waypointX = result[0]
+        waypointY = result[1]
     elif move == "R":
-        direction += distance
-        result = rotate((myShip.x, myShip.y), (myShip.x + myShip.waypointX, myShip.y + myShip.waypointY), direction)
-        waypointX = myShip.waypointX - result[0]
-        waypointY = myShip.waypointY - result[1]
+        degrees += distance
+        result = rotate((myShip.x, myShip.y), (myShip.waypointX, myShip.waypointY), degrees)
+        waypointX = result[0]
+        waypointY = result[1]
     elif move == "F":
+        x = myShip.waypointXDistance() * distance
+        y = myShip.waypointYDistance() * distance
+
         if myShip.direction == 90:
-            x = myShip.waypointXDistance() * distance
-            y = myShip.waypointYDistance() * distance
+            waypointX += myShip.waypointXDistance() * distance   
+            waypointY += myShip.waypointYDistance() * distance
         elif myShip.direction == 0 or myShip.direction == 360:
-            x = myShip.waypointXDistance() * distance
-            y = myShip.waypointYDistance() * distance
+            waypointX += myShip.waypointXDistance() * distance
+            waypointY += myShip.waypointYDistance() * distance
         elif myShip.direction == 270:
-            x -= myShip.waypointXDistance() * distance
-            y -= myShip.waypointYDistance() * distance
+            waypointX -= myShip.waypointXDistance() * distance
+            waypointY -= myShip.waypointYDistance() * distance
         elif myShip.direction == 180:
-            x -= myShip.waypointXDistance() * distance
-            y -= myShip.waypointYDistance() * distance
+            waypointX -= myShip.waypointXDistance() * distance
+            waypointY -= myShip.waypointYDistance() * distance
+        
 
     myShip.move(x, y, waypointX, waypointY, direction)
 
